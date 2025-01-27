@@ -1,0 +1,23 @@
+[project]
+name = "logs_are_all_you_need"
+version = "0.1.0"
+description = "logs_are_all_you_need using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "crewai[tools]>=0.98.0,<1.0.0"
+]
+
+[project.scripts]
+logs_are_all_you_need = "logs_are_all_you_need.main:run"
+run_crew = "logs_are_all_you_need.main:run"
+train = "logs_are_all_you_need.main:train"
+replay = "logs_are_all_you_need.main:replay"
+test = "logs_are_all_you_need.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
