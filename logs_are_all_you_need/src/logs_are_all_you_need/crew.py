@@ -46,21 +46,21 @@ class LogsAreAllYouNeed():
 	def develop_topic_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['develop_topic_task'],
-			output_file='develop_topic.py'
+			output_file='outputs/codebase.py'
 		)
 
 	@task
 	def write_unit_tests_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['write_unit_tests_task'],
-			output_file='unit_tests.py'
+			output_file='outputs/unit_tests.py'
 		)
 
 	@task
 	def execute_unit_tests_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['execute_unit_tests_task'],
-			output_file='unit_tests_results.txt',
+			output_file='outputs/tests_results.txt',
 			allow_code_execution=True
 		)
 

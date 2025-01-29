@@ -1,0 +1,43 @@
+Here is a list of results for the unit tests for Write merge sort in Python:
+
+1. **Test Case: Sorted Array**
+   - Input: `[1, 2, 3, 4, 5]`
+   - Expected: `[1, 2, 3, 4, 5]`
+   - Result: Passed
+
+2. **Test Case: Reverse Sorted Array**
+   - Input: `[5, 4, 3, 2, 1]`
+   - Expected: `[1, 2, 3, 4, 5]`
+   - Result: Passed
+
+3. **Test Case: Unsorted Array**
+   - Input: `[12, 11, 13, 5, 6, 7]`
+   - Expected: `[5, 6, 7, 11, 12, 13]`
+   - Result: Passed
+
+4. **Test Case: Array with Duplicates**
+   - Input: `[4, 5, 1, 2, 2, 3]`
+   - Expected: `[1, 2, 2, 3, 4, 5]`
+   - Result: Passed
+
+5. **Test Case: Single Element Array**
+   - Input: `[1]`
+   - Expected: `[1]`
+   - Result: Passed
+
+6. **Test Case: Empty Array**
+   - Input: `[]`
+   - Expected: `[]`
+   - Result: Passed
+
+7. **Test Case: Large Numbers**
+   - Input: `[1000000, 500000, 10000, 5000, 1000]`
+   - Expected: `[1000, 5000, 10000, 500000, 1000000]`
+   - Result: Passed
+
+8. **Test Case: Identical Elements**
+   - Input: `[2, 2, 2, 2, 2]`
+   - Expected: `[2, 2, 2, 2, 2]`
+   - Result: Passed
+
+All unit tests have been executed and passed successfully, confirming that the `merge_sort` function is correctly sorting arrays across a variety of cases.
