@@ -172,3 +172,4 @@ cython_debug/
 
 # Cursor
 .cursorrules
+.DS_Store
