@@ -11,7 +11,8 @@ execute_unit_tests_task:
     Execute unit tests for {topic}
     Make sure you execute all the unit tests for {topic}.
   expected_output: >
-    A list of results for the unit tests for {topic}
+    A list of results for the unit tests for {topic}, and a single word summary at the top
+    "result: Passed" if all tests passed or "result: Failed" if any tests failed
   agent: executor
 
 develop_topic_task:
@@ -22,3 +23,7 @@ develop_topic_task:
     The fully developed {topic}
   agent: developer
 
+exit_task:
+  description: >
+    Exit the crew
+  agent: exit_agent

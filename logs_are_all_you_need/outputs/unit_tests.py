@@ -1,105 +1,83 @@
-Here is a list of unit tests for the `merge_sort` function in Python, implemented using the unittest framework:
+Here is a list of unit tests for the merge sort implementation in Python:
 
 ```python
 import unittest
 
 def merge_sort(arr):
     if len(arr) > 1:
-        mid = len(arr) // 2  # Finding the mid of the array
-        L = arr[:mid]        # Dividing the elements into 2 halves
-        R = arr[mid:]
+        mid = len(arr) // 2
+        left_half = arr[:mid]
+        right_half = arr[mid:]
 
-        merge_sort(L)        # Sorting the first half
-        merge_sort(R)        # Sorting the second half
+        merge_sort(left_half)
+        merge_sort(right_half)
 
         i = j = k = 0
         
-        # Copy data to temp arrays L[] and R[]
-        while i < len(L) and j < len(R):
-            if L[i] < R[j]:
-                arr[k] = L[i]
+        while i < len(left_half) and j < len(right_half):
+            if left_half[i] < right_half[j]:
+                arr[k] = left_half[i]
                 i += 1
             else:
-                arr[k] = R[j]
+                arr[k] = right_half[j]
                 j += 1
             k += 1
 
-        # Checking if any element was left in L
-        while i < len(L):
-            arr[k] = L[i]
+        while i < len(left_half):
+            arr[k] = left_half[i]
             i += 1
             k += 1
 
-        # Checking if any element was left in R
-        while j < len(R):
-            arr[k] = R[j]
+        while j < len(right_half):
+            arr[k] = right_half[j]
             j += 1
             k += 1
 
-
 class TestMergeSort(unittest.TestCase):
-
-    def test_sorted_array(self):
-        arr = [1, 2, 3, 4, 5]
-        expected = [1, 2, 3, 4, 5]
+    
+    def test_empty_array(self):
+        arr = []
         merge_sort(arr)
-        self.assertEqual(arr, expected)
-
-    def test_reverse_sorted_array(self):
-        arr = [5, 4, 3, 2, 1]
-        expected = [1, 2, 3, 4, 5]
-        merge_sort(arr)
-        self.assertEqual(arr, expected)
-
-    def test_unsorted_array(self):
-        arr = [12, 11, 13, 5, 6, 7]
-        expected = [5, 6, 7, 11, 12, 13]
-        merge_sort(arr)
-        self.assertEqual(arr, expected)
-
-    def test_array_with_duplicates(self):
-        arr = [4, 5, 1, 2, 2, 3]
-        expected = [1, 2, 2, 3, 4, 5]
-        merge_sort(arr)
-        self.assertEqual(arr, expected)
+        self.assertEqual(arr, [])
 
     def test_single_element_array(self):
         arr = [1]
-        expected = [1]
         merge_sort(arr)
-        self.assertEqual(arr, expected)
-
-    def test_empty_array(self):
-        arr = []
-        expected = []
+        self.assertEqual(arr, [1])
+        
+    def test_sorted_array(self):
+        arr = [1, 2, 3, 4, 5]
         merge_sort(arr)
-        self.assertEqual(arr, expected)
-
-    def test_large_numbers(self):
-        arr = [1000000, 500000, 10000, 5000, 1000]
-        expected = [1000, 5000, 10000, 500000, 1000000]
+        self.assertEqual(arr, [1, 2, 3, 4, 5])
+        
+    def test_reverse_sorted_array(self):
+        arr = [5, 4, 3, 2, 1]
         merge_sort(arr)
-        self.assertEqual(arr, expected)
-
-    def test_identical_elements(self):
-        arr = [2, 2, 2, 2, 2]
-        expected = [2, 2, 2, 2, 2]
+        self.assertEqual(arr, [1, 2, 3, 4, 5])
+        
+    def test_random_array(self):
+        arr = [3, 2, 5, 4, 1]
         merge_sort(arr)
-        self.assertEqual(arr, expected)
+        self.assertEqual(arr, [1, 2, 3, 4, 5])
+        
+    def test_duplicate_elements(self):
+        arr = [1, 3, 2, 3, 3]
+        merge_sort(arr)
+        self.assertEqual(arr, [1, 2, 3, 3, 3])
+        
+    def test_negative_numbers(self):
+        arr = [-1, -3, -2, -4, -5]
+        merge_sort(arr)
+        self.assertEqual(arr, [-5, -4, -3, -2, -1])
+        
+    def test_mixed_numbers(self):
+        arr = [3, -1, 2, -5, 4]
+        merge_sort(arr)
+        self.assertEqual(arr, [-5, -1, 2, 3, 4])
 
-if __name__ == "__main__":
+# Run the tests
+if __name__ == '__main__':
     unittest.main()
 ```
 
-This unit test code covers various scenarios, including:
-
-1. Already sorted array.
-2. Reverse sorted array.
-3. Unsorted array.
-4. Array with duplicate values.
-5. Single element array.
-6. Empty array.
-7. Array with large numbers.
-8. Array with identical elements.
-
-Each test case checks whether the `merge_sort` function correctly sorts the array, asserting the expected output with the actual result. Run this script as a standalone program to execute these tests.
+Each test case handles various scenarios, including empty arrays, single-element arrays, presorted arrays, reverse sorted arrays, random arrays, arrays with duplicate elements, and arrays with negative numbers. These tests help ensure the functionality and robustness of the merge sort implementation.

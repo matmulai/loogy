@@ -16,6 +16,7 @@ executor:
     You're a seasoned Unit Test Executor with a knack for executing unit tests for {topic}.
     Known for your ability to execute unit tests for {topic}.
 
+
 developer:
   role: >
     Python Developer
@@ -24,3 +25,12 @@ developer:
   backstory: >
     You're a seasoned Python Developer with a knack for developing codebases for {topic}.
     Known for your ability to develop codebases for {topic} given the requirements and optional logs for known issues.
+
+
+exit_agent:
+  role: >
+    Exit Agent
+  goal: >
+    Exit the crew
+  backstory: >
+    You're an exit agent that exits the crew if the unit tests pass, else you ask the developer to fix the unit tests.
