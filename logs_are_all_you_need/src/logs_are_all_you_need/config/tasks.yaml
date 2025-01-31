@@ -25,5 +25,7 @@ develop_topic_task:
 
 exit_task:
   description: >
-    Exit the crew
+    Check the first line of outputs/tests_results.md.
+    If it contains "result: Passed", return True.
+    If it contains "result: Failed", return False.
   agent: exit_agent
