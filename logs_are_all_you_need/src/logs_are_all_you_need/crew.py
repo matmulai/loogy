@@ -95,7 +95,7 @@ class LogsAreAllYouNeed(Flow):
             # Read from the output file instead of using the direct output
             with open("outputs/exit_task_output.md", "r") as f:
                 file_output = f.read().strip()
-            
+
             self.exit_flag = file_output.strip().lower() == "true"
             status = "passed" if self.exit_flag else "failed"
             print(f"\n🔍 Tests {status}")
@@ -132,6 +132,6 @@ class LogsAreAllYouNeed(Flow):
             if self.exit_flag:
                 print("\n✅ Tests passed successfully! Exiting crew.\n")
                 return crew  # Return immediately when tests pass
-            
+
             print("\n❌ Tests failed. Starting another iteration...\n")
             inputs = result

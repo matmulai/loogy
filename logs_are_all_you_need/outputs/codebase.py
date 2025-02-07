@@ -1,47 +1,57 @@
 ```python
 def merge_sort(arr):
+    """
+    This function sorts an array using the merge sort algorithm.
+    """
     if len(arr) > 1:
-        # Find the middle point and divide it
+        # Find the middle of the array
         mid = len(arr) // 2
-        L = arr[:mid]
-        R = arr[mid:]
+        
+        # Dividing the array elements into 2 halves
+        left_half = arr[:mid]
+        right_half = arr[mid:]
 
-        # Sort the first half
-        merge_sort(L)
+        # Sorting the first half
+        merge_sort(left_half)
 
-        # Sort the second half
-        merge_sort(R)
+        # Sorting the second half
+        merge_sort(right_half)
 
         i = j = k = 0
 
-        # Copy data to temp arrays L[] and R[]
-        while i < len(L) and j < len(R):
-            if L[i] < R[j]:
-                arr[k] = L[i]
+        # Copy data to temporary arrays L[] and R[]
+        while i < len(left_half) and j < len(right_half):
+            if left_half[i] < right_half[j]:
+                arr[k] = left_half[i]
                 i += 1
             else:
-                arr[k] = R[j]
+                arr[k] = right_half[j]
                 j += 1
             k += 1
 
-        # Check if any element was left in L
-        while i < len(L):
-            arr[k] = L[i]
+        # Checking if any element was left
+        while i < len(left_half):
+            arr[k] = left_half[i]
             i += 1
             k += 1
 
-        # Check if any element was left in R
-        while j < len(R):
-            arr[k] = R[j]
+        while j < len(right_half):
+            arr[k] = right_half[j]
             j += 1
             k += 1
 
-    return arr
-
-# Example usage:
+# Test the merge_sort function
 arr = [12, 11, 13, 5, 6, 7]
-sorted_arr = merge_sort(arr)
-print("Sorted array is:", sorted_arr)
+print("Given array is", arr)
+
+merge_sort(arr)
+print("Sorted array is", arr)
 ```
 
-I've written a straightforward implementation of the Merge Sort algorithm in Python. This code defines a recursive function `merge_sort` which sorts an array by dividing it, sorting each half, and then merging the sorted halves. The known issue of the sorting not functioning correctly could stem from incorrect merging logic, or not properly handling the base cases of the recursion. The provided implementation ensures that all elements from the two halves are considered and merged correctly into a sorted array.
+Known Issues:
+
+1. **Space Complexity:** Merge sort requires additional space proportional to the size of the input array due to the temporary arrays used for merging.
+2. **Stable Sort:** The algorithm is stable as it does not change the relative order of elements with equal keys.
+3. **Recursive Stack:** This implementation uses a recursive approach which might lead to a stack overflow when sorting very large arrays due to excessive recursion depth in Python. Using an iterative approach or controlling the maximum recursion depth can alleviate this.
+
+This code defines a merge sort algorithm that can sort an array of integers. The test case demonstrates the sorting process. The mentioned known issues should be considered for conscious use in environments with limited resources or specific constraints.

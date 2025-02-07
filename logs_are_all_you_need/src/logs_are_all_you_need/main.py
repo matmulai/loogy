@@ -13,13 +13,13 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
-def run():
+def run(topic, logs):
     """
     Run the crew.
     """
     inputs = {
-        "topic": "Write merge sort in Python",
-        "logs": "The codebase is not working as expected. The merge sort is not sorting the list correctly.",
+        "topic": topic,
+        "logs": logs,
     }
 
     try:

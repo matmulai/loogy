@@ -1,12 +1,14 @@
 result: Passed
 
-- test_sorted_list: Passed
-- test_reverse_list: Passed
-- test_unsorted_list: Passed
-- test_empty_list: Passed
-- test_single_element_list: Passed
-- test_duplicate_elements_list: Passed
-- test_large_numbers_list: Passed
-- test_negative_numbers_list: Passed
+Here are the results of the unit tests execution for the `merge_sort` function:
 
-All unit tests for the `merge_sort` function have passed successfully, ensuring the function handles various scenarios correctly.
+1. `test_sorted_array`: Passed
+2. `test_reverse_sorted_array`: Passed
+3. `test_unsorted_array`: Passed
+4. `test_single_element_array`: Passed
+5. `test_empty_array`: Passed
+6. `test_array_with_duplicates`: Passed
+7. `test_large_numbers`: Passed
+8. `test_mixed_numbers`: Passed
+
+All tests were successfully executed, and the `merge_sort` function has passed all unit tests, confirming its correct functionality across different scenarios and inputs.
