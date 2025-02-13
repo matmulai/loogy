@@ -25,22 +25,30 @@ class LogsAreAllYouNeed(Flow):
     @agent
     @start()
     def developer(self) -> Agent:
-        return Agent(config=self.agents_config["developer"], verbose=True)
+        agent = Agent(config=self.agents_config["developer"], verbose=True)
+        print(f"\n🤖 Developer using model: {self.agents_config['developer']['llm']}")
+        return agent
 
     @agent
     @listen(developer)
     def tester(self) -> Agent:
-        return Agent(config=self.agents_config["tester"], verbose=True)
+        agent = Agent(config=self.agents_config["tester"], verbose=True)
+        print(f"\n🤖 Tester using model: {self.agents_config['tester']['llm']}")
+        return agent
 
     @agent
     @listen(tester)
     def executor(self) -> Agent:
-        return Agent(config=self.agents_config["executor"], verbose=True)
+        agent = Agent(config=self.agents_config["executor"], verbose=True)
+        print(f"\n🤖 Executor using model: {self.agents_config['executor']['llm']}")
+        return agent
 
     @agent
     @listen(executor)
     def exit_agent(self) -> Agent:
-        return Agent(config=self.agents_config["exit_agent"], verbose=True)
+        agent = Agent(config=self.agents_config["exit_agent"], verbose=True)
+        print(f"\n🤖 Exit Agent using model: {self.agents_config['exit_agent']['llm']}")
+        return agent
 
     # To learn more about structured task outputs,
     # task dependencies, and task callbacks, check out the documentation:
@@ -114,8 +122,13 @@ class LogsAreAllYouNeed(Flow):
             verbose=True,
         )
 
-        inputs = {}
-        while True:  # Changed to always check the file
+        iteration_count = 0  # Initialize iteration counter
+        inputs = {}  # Initialize inputs dictionary
+        
+        while iteration_count < 3 or self.exit_flag:  # Changed to always check the file
+            iteration_count += 1  # Increment iteration counter
+            if iteration_count >= 3:  # Check if 3 iterations have been reached
+                self.exit_flag = False  # Set exit flag to false after 3 iterations
             print("\n🔄 Starting iteration...")
             result = crew.kickoff(inputs=inputs)
 
