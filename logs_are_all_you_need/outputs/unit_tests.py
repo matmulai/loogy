@@ -1,65 +1,95 @@
 ```python
+import numpy as np
 import unittest
+from xgboost import XGBClassifier
+from sklearn.metrics import accuracy_score
+from codebase import generate_classification_data, preprocess_data, train_model, evaluate_model
 
-from codebase import search_word_in_dictionary  # Adjust the import based on your file structure
-
-class TestSearchWordInDictionary(unittest.TestCase):
+class TestModel(unittest.TestCase):
     
     def setUp(self):
-        """Set up a sample dictionary for all tests."""
-        self.sample_dictionary = {
-            "python": "A high-level programming language.",
-            "javascript": "A scripting language commonly used in web development.",
-            "java": "A high-level, class-based, object-oriented programming language."
-        }
+        """
+        Set up a test case with synthetic data.
+        """
+        self.n_samples = 100
+        self.n_features = 10
+        self.n_informative = 7
+        self.n_redundant = 3
+        self.random_state = 42
+        
+        # Generate synthetic classification data
+        self.X, self.y = generate_classification_data(
+            n_samples=self.n_samples, 
+            n_features=self.n_features,
+            n_informative=self.n_informative, 
+            n_redundant=self.n_redundant, 
+            random_state=self.random_state
+        )
+        
+        # Preprocess the data
+        self.X_train, self.X_test, self.y_train, self.y_test = preprocess_data(self.X, self.y, test_size=0.2)
 
-    def test_existing_word_case_insensitive(self):
-        """Test that a word exists in the dictionary regardless of case."""
-        self.assertEqual(search_word_in_dictionary(self.sample_dictionary, "Python"), "A high-level programming language.")
-        self.assertEqual(search_word_in_dictionary(self.sample_dictionary, "JAVASCRIPT"), "A scripting language commonly used in web development.")
-        self.assertEqual(search_word_in_dictionary(self.sample_dictionary, "JaVa"), "A high-level, class-based, object-oriented programming language.")
+    def test_generate_classification_data(self):
+        """
+        Test if the generated data has the correct shapes.
+        """
+        X, y = generate_classification_data(n_samples=1000, n_features=20)
+        self.assertEqual(X.shape[0], 1000)
+        self.assertEqual(X.shape[1], 20)
+        self.assertEqual(len(y), 1000)
 
-    def test_non_existing_word(self):
-        """Test searching for a word that does not exist in the dictionary."""
-        self.assertIsNone(search_word_in_dictionary(self.sample_dictionary, "ruby"))
-        self.assertIsNone(search_word_in_dictionary(self.sample_dictionary, "C++"))
+    def test_preprocess_data(self):
+        """
+        Test if the preprocessing step maintains the correct shapes.
+        """
+        X_train, X_test, y_train, y_test = preprocess_data(self.X, self.y)
+        self.assertEqual(X_train.shape[0], 80)  # 80% for training
+        self.assertEqual(X_test.shape[0], 20)   # 20% for testing
+        self.assertEqual(len(y_train), 80)
+        self.assertEqual(len(y_test), 20)
 
-    def test_empty_dictionary(self):
-        """Test searching in an empty dictionary."""
-        empty_dictionary = {}
-        self.assertIsNone(search_word_in_dictionary(empty_dictionary, "Python"))
-    
-    def test_empty_word(self):
-        """Test searching with an empty word."""
-        self.assertIsNone(search_word_in_dictionary(self.sample_dictionary, ""))
+    def test_train_model(self):
+        """
+        Test the training of the model verifies if it returns an instance of XGBClassifier.
+        """
+        model = train_model(self.X_train, self.y_train)
+        self.assertIsInstance(model, XGBClassifier)
 
-    def test_special_characters(self):
-        """Test searching for a word with special characters."""
-        special_dictionary = {
-            "hello!": "A greeting used to initiate conversation.",
-            "goodbye!": "A parting expression."
-        }
-        self.assertEqual(search_word_in_dictionary(special_dictionary, "hello!"), "A greeting used to initiate conversation.")
-        self.assertIsNone(search_word_in_dictionary(special_dictionary, "hi!"))
+    def test_evaluate_model(self):
+        """
+        Test evaluation function gives a result between 0 and 1.
+        """
+        model = train_model(self.X_train, self.y_train)
+        accuracy = evaluate_model(model, self.X_test, self.y_test)
+        self.assertGreaterEqual(accuracy, 0)
+        self.assertLessEqual(accuracy, 1)
 
-    def test_numerical_word(self):
-        """Test searching for a word that is a number."""
-        number_dictionary = {
-            "one": "The first cardinal number.",
-            "two": "The second cardinal number."
-        }
-        self.assertEqual(search_word_in_dictionary(number_dictionary, "ONE"), "The first cardinal number.")
-        self.assertIsNone(search_word_in_dictionary(number_dictionary, "three"))
+    def test_train_model_edge_case(self):
+        """
+        Test training model with insufficient samples.
+        """
+        with self.assertRaises(ValueError):
+            # Passing empty set
+            train_model(np.array([]).reshape(0, self.n_features), np.array([]))
+
+    def test_evaluate_model_edge_case(self):
+        """
+        Test evaluation with unfit model.
+        """
+        with self.assertRaises(ValueError):
+            model = XGBClassifier()
+            evaluate_model(model, self.X_test, self.y_test)
 
 if __name__ == "__main__":
     unittest.main()
 ```
-This comprehensive set of unit tests covers:
-1. **Case Insensitivity:** Tests that the search function can find words regardless of their case.
-2. **Non-Existing Words:** Validates that looking for words not in the dictionary returns `None`.
-3. **Empty Dictionary:** Ensures searching in an empty dictionary correctly returns `None`.
-4. **Empty Word Input:** Confirms that an empty search phrase appropriately returns `None`.
-5. **Special Characters:** Tests the function's handling of dictionary entries with special characters.
-6. **Numerical Words:** Validates that words that are numbers can also be searched in the dictionary.
 
-This set of tests is well-documented, making it easy to understand what each test is verifying, ensuring thorough coverage of edge cases.
+This set of unit tests covers the following:
+
+1. **Data Generation**: Ensures that the generated classification data meets expected specifications.
+2. **Data Preprocessing**: Checks that the split maintains the expected shapes for train and test sets.
+3. **Model Training**: Verifies that the `train_model` function returns an instance of `XGBClassifier`.
+4. **Model Evaluation**: Ensures the accuracy score returned by `evaluate_model` is between 0 and 1.
+5. **Edge Cases**: Includes tests for edge cases such as insufficient samples for training and evaluation of unfit model, ensuring robustness in various scenarios.
+
+Each test is documented and follows best practices to ensure the reliability of the code.

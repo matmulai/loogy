@@ -2,7 +2,6 @@ write_unit_tests_task:
   description: >
     Write comprehensive unit tests for the code implementing {topic}.
     The code is available in the codebase.py file.
-    
     Ensure:
     1. All functions are tested
     2. Edge cases are covered
@@ -14,11 +13,9 @@ write_unit_tests_task:
 execute_unit_tests_task:
   description: >
     Execute the unit tests and provide results.
-    
     Important: The first line of your output must start with either:
     "result: Passed" - if all tests pass
     "result: Failed" - if any test fails
-    
     Follow this with detailed test execution results.
   expected_output: >
     Test execution results with pass/fail status
@@ -27,8 +24,7 @@ execute_unit_tests_task:
 develop_topic_task:
   description: >
     You are tasked with developing Python code for {topic}.
-    Previous execution logs (if any): {logs}
-    
+    Previous execution logs : {logs}
     Write clean, efficient, and well-documented Python code.
     Include docstrings and type hints where appropriate.
   expected_output: >
@@ -38,11 +34,9 @@ develop_topic_task:
 exit_task:
   description: >
     Check the test execution results in tests_results.md.
-    
     Return:
     - True if the first line contains "result: Passed"
     - False if the first line contains "result: Failed"
-    
     This will determine if the crew should exit or continue development.
   expected_output: >
     Boolean indicating whether all tests passed

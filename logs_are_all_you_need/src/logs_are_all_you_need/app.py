@@ -36,7 +36,16 @@ def main():
     if "iteration" not in st.session_state:
         st.session_state.iteration = 0
     if "topic" not in st.session_state:
-        st.session_state.topic = "Search a word in a dictionary"
+        st.session_state.topic = """ Fix the code ```import numpy as np \n import pandas as pd \n from sklearn.datasets import make_classification \n 
+    from sklearn.model_selection import train_test_split\n from xgboost import XGBClassifier\n from sklearn.metrics import accuracy_score\n
+    X, y = make_classification(n_samples=1000, n_features=20, n_informative=15,n_redundant=5, random_state=42) \n np.random.shuffle(X) 
+    X = X.T \n X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) \n
+    X_train[:, 0] = X_train[:, 1] + X_train[:, 2, :] X_train = X_train @ np.zeros((X_train.shape[1], X_train.shape[1]))  \n
+    model = XGBClassifier(use_label_encoder=False, eval_metric='logloss') model.fit(X_train, y_train) \n
+    y_pred = model.predict(X_test)\n accuracy = accuracy_score(y_test, y_pred) \n print(f"Model Accuracy: '{{accuracy:.4f}}'")
+"""
+    if "last_topic" not in st.session_state:
+        st.session_state.last_topic = None
 
     # UI Components
     topic = st.text_input("Development Task:", value=st.session_state.topic)
@@ -44,7 +53,18 @@ def main():
 
     if start_button:
         os.environ["OPENAI_API_KEY"] = api_key
+        
+        # Initialize crew
+        crew = LogsAreAllYouNeed()
+        
+        # Clean outputs if topic changed
+        if st.session_state.last_topic != topic:
+            logger.info(f"Topic changed from '{st.session_state.last_topic}' to '{topic}'")
+            crew.clean_outputs_directory()
+            st.session_state.iteration = 0
+        
         st.session_state.topic = topic
+        st.session_state.last_topic = topic
 
         # Initialize UI containers
         progress_bar = st.progress(0)
@@ -58,9 +78,6 @@ def main():
         with col2:
             st.subheader("Test Results")
             test_results = st.empty()
-
-        # Initialize crew
-        crew = LogsAreAllYouNeed()
 
         try:
             while st.session_state.iteration < 3:

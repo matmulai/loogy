@@ -208,16 +208,49 @@ class LogsAreAllYouNeed(Flow):
         logger.info("Crew initialized")
         return crew
 
+    def clean_outputs_directory(self):
+        """Clean all files from outputs directory"""
+        try:
+            for file in os.listdir(self.outputs_dir):
+                file_path = os.path.join(self.outputs_dir, file)
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                    logger.info(f"Removed file: {file_path}")
+            logger.info("Cleaned outputs directory")
+        except Exception as e:
+            logger.error(f"Error cleaning outputs directory: {e}")
+
     def run(self, topic: str, logs: str = "", max_iterations: int = 2):
         """Run the crew with specific inputs"""
         logger.info(f"\n=== Starting Run with Topic: {topic} ===")
+
+        # Clean outputs directory for new topic
+        if hasattr(self, '_last_topic') and self._last_topic != topic:
+            logger.info(f"New topic detected (was: {self._last_topic}, now: {topic})")
+            self.clean_outputs_directory()
+        self._last_topic = topic
+
+        # Load logs from test_results.md if it exists
+        test_results_path = os.path.join(self.outputs_dir, "tests_results.md")
+        if os.path.exists(test_results_path):
+            try:
+                with open(test_results_path, 'r') as f:
+                    logs = f.read()
+                logger.info(f"Loaded logs from {test_results_path}")
+                logger.info(f"Logs content: {logs[:200]}...")  # Log first 200 chars
+            except Exception as e:
+                logger.warning(f"Could not read test results: {e}")
+                logs = ""
+        else:
+            logger.info("No previous test results found")
+            logs = ""
 
         # Store inputs for task formatting
         self.inputs = {
             "topic": topic,
             "logs": logs
         }
-        logger.info(f"Set inputs: {self.inputs}")
+        logger.info(f"Set inputs with topic and logs (logs length: {len(logs)})")
 
         crew = self.crew()
         iteration_count = 0
