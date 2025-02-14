@@ -2,6 +2,11 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.flow.flow import Flow, listen, start
 import json
+import os
+from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
@@ -18,6 +23,27 @@ class LogsAreAllYouNeed(Flow):
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
     exit_flag = False
+
+    def __init__(self):
+        super().__init__()
+        # Get the absolute path to the outputs directory
+        self.base_dir = Path(__file__).parent.parent.parent
+        self.outputs_dir = self.base_dir / "outputs"
+
+        # Create outputs directory if it doesn't exist
+        os.makedirs(self.outputs_dir, exist_ok=True)
+
+        # Initialize inputs
+        self.inputs = {}
+
+    def get_output_path(self, filename: str) -> str:
+        """Get absolute path for output files"""
+        return str(self.outputs_dir / filename)
+
+    def set_inputs(self, inputs: dict) -> None:
+        """Set the inputs for task formatting"""
+        self.inputs = inputs or {}
+        logger.info(f"Setting inputs: {self.inputs}")
 
     # If you would like to add tools to your agents, you can learn more about it here:
     # https://docs.crewai.com/concepts/agents#agent-tools
@@ -56,33 +82,60 @@ class LogsAreAllYouNeed(Flow):
 
     @task
     def develop_topic_task(self) -> Task:
+        logger.info("Creating develop_topic_task")
+        description = self.tasks_config["develop_topic_task"]["description"]
+        expected_output = self.tasks_config["develop_topic_task"]["expected_output"]
+        
+        format_vars = {
+            "topic": self.inputs.get("topic", "default topic"),
+            "logs": self.inputs.get("logs", ""),
+        }
+        logger.info(f"Develop task format_vars: {format_vars}")
+        
+        formatted_description = description.format(**format_vars)
+        formatted_output = expected_output.format(**format_vars)
+        logger.info(f"Formatted description: {formatted_description}")
+        
         return Task(
-            description=self.tasks_config["develop_topic_task"]["description"],
-            expected_output=self.tasks_config["develop_topic_task"]["expected_output"],
+            description=formatted_description,
+            expected_output=formatted_output,
             agent=self.developer(),
-            output_file="outputs/codebase.py",
+            output_file=self.get_output_path("codebase.py"),
         )
 
     @task
     def write_unit_tests_task(self) -> Task:
+        description = self.tasks_config["write_unit_tests_task"]["description"]
+        expected_output = self.tasks_config["write_unit_tests_task"]["expected_output"]
+
+        # Add default values for formatting
+        format_vars = {"topic": "default topic", "logs": ""}
+        format_vars.update(self.inputs)  # Update with actual inputs
+        logger.info(f"format_vars: {format_vars}")
+
         return Task(
-            description=self.tasks_config["write_unit_tests_task"]["description"],
-            expected_output=self.tasks_config["write_unit_tests_task"][
-                "expected_output"
-            ],
+            description=description.format(**format_vars),
+            expected_output=expected_output.format(**format_vars),
             agent=self.tester(),
-            output_file="outputs/unit_tests.py",
+            output_file=self.get_output_path("unit_tests.py"),
         )
 
     @task
     def execute_unit_tests_task(self) -> Task:
+        description = self.tasks_config["execute_unit_tests_task"]["description"]
+        expected_output = self.tasks_config["execute_unit_tests_task"][
+            "expected_output"
+        ]
+
+        # Add default values for formatting
+        format_vars = {"topic": "default topic", "logs": ""}
+        format_vars.update(self.inputs)  # Update with actual inputs
+
         return Task(
-            description=self.tasks_config["execute_unit_tests_task"]["description"],
-            expected_output=self.tasks_config["execute_unit_tests_task"][
-                "expected_output"
-            ],
+            description=description.format(**format_vars),
+            expected_output=expected_output.format(**format_vars),
             agent=self.executor(),
-            output_file="outputs/tests_results.md",
+            output_file=self.get_output_path("tests_results.md"),
             allow_code_execution=True,
         )
 
@@ -91,17 +144,17 @@ class LogsAreAllYouNeed(Flow):
         return Task(
             description=self.tasks_config["exit_task"]["description"],
             expected_output="True or False based on test results",
-            input_file="outputs/tests_results.md",
+            input_file=self.get_output_path("tests_results.md"),
             agent=self.exit_agent(),
             output_parser=self.parse_exit_task_output,
-            output_file="outputs/exit_task_output.md",
+            output_file=self.get_output_path("exit_task_output.md"),
         )
 
     def parse_exit_task_output(self, output: str) -> str:
         """Parse the exit task output and set the exit flag"""
         try:
-            # Read from the output file instead of using the direct output
-            with open("outputs/exit_task_output.md", "r") as f:
+            # Use absolute path for reading file
+            with open(self.get_output_path("exit_task_output.md"), "r") as f:
                 file_output = f.read().strip()
 
             self.exit_flag = file_output.strip().lower() == "true"
@@ -115,36 +168,61 @@ class LogsAreAllYouNeed(Flow):
     @crew
     def crew(self) -> Crew:
         """Creates the LogsAreAllYouNeed crew that runs until success"""
+        logger.info("Creating crew...")
+        
         crew = Crew(
             agents=self.agents,
             tasks=self.tasks,
             process=Process.sequential,
             verbose=True,
         )
+        logger.info("Crew initialized")
+        return crew
 
-        iteration_count = 0  # Initialize iteration counter
-        inputs = {}  # Initialize inputs dictionary
+    def run(self, topic: str, logs: str = "", max_iterations: int = 3):
+        """Run the crew with specific inputs"""
+        logger.info(f"Running crew with topic: {topic}, logs: {logs}")
         
-        while iteration_count < 3 or self.exit_flag:  # Changed to always check the file
-            iteration_count += 1  # Increment iteration counter
-            if iteration_count >= 3:  # Check if 3 iterations have been reached
-                self.exit_flag = False  # Set exit flag to false after 3 iterations
-            print("\n🔄 Starting iteration...")
-            result = crew.kickoff(inputs=inputs)
+        # Store inputs for task formatting
+        self.inputs = {
+            "topic": topic,
+            "logs": logs
+        }
+        logger.info(f"Set inputs: {self.inputs}")
 
-            # Read and check the exit task output
+        crew = self.crew()
+        iteration_count = 0
+        
+        while iteration_count < max_iterations and not self.exit_flag:
+            iteration_count += 1
+            logger.info(f"\n=== Starting iteration {iteration_count} ===")
+            print(f"\n🔄 Starting iteration {iteration_count}...")
+            print(f"🎯 Current topic: {topic}")
+
             try:
-                with open("outputs/exit_task_output.md", "r") as f:
-                    exit_output = f.read().strip()
-                self.exit_flag = exit_output.lower() == "true"
-                print(f"\n🔍 Exit flag status: {self.exit_flag}")
-                print(f"📝 Exit task output: {exit_output}")
+                result = crew.kickoff(inputs=self.inputs)
+                logger.info(f"Crew kickoff result: {result}")
+
+                # Check exit status
+                try:
+                    exit_file = self.get_output_path("exit_task_output.md")
+                    with open(exit_file, "r") as f:
+                        exit_output = f.read().strip()
+                    
+                    self.exit_flag = exit_output.lower() == "true"
+                    print(f"\n🔍 Exit flag status: {self.exit_flag}")
+                    print(f"📝 Exit task output: {exit_output}")
+                except Exception as e:
+                    logger.error(f"Error reading exit file: {e}")
+
+                if self.exit_flag:
+                    print("\n✅ Tests passed successfully! Exiting crew.\n")
+                    break
+
+                print("\n❌ Tests failed. Starting another iteration...\n")
+
             except Exception as e:
-                print(f"⚠️ Could not read exit task output: {e}")
+                logger.error(f"Error during iteration: {e}", exc_info=True)
+                break
 
-            if self.exit_flag:
-                print("\n✅ Tests passed successfully! Exiting crew.\n")
-                return crew  # Return immediately when tests pass
-
-            print("\n❌ Tests failed. Starting another iteration...\n")
-            inputs = result
+        return crew

@@ -4,7 +4,8 @@ import time
 from crew import LogsAreAllYouNeed
 import openai
 from dotenv import load_dotenv
-
+import logging
+logger = logging.getLogger(__name__)
 # Load environment variables from .env file
 load_dotenv()
 
@@ -13,12 +14,17 @@ st.set_page_config(layout="wide")
 
 def read_file_content(file_path):
     """Read and return file content if it exists"""
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as f:
+    crew_instance = LogsAreAllYouNeed()
+    absolute_path = crew_instance.get_output_path(os.path.basename(file_path))
+    if os.path.exists(absolute_path):
+        with open(absolute_path, 'r') as f:
             return f.read()
     return "File not generated yet..."
 
 def main():
+    # Configure logging
+    logging.basicConfig(level=logging.INFO)
+    
     st.title("Logs Are All You Need")
 
     # API Key input in sidebar
@@ -55,9 +61,11 @@ def main():
     if start_button and api_key:
         # Save topic to session state
         st.session_state.topic = topic
+        logger.info(f"Topic set to: {topic}")
 
         # Set the API key
         os.environ["OPENAI_API_KEY"] = api_key
+        logger.info("API key set")
 
         try:
             # Create three columns for outputs
@@ -88,34 +96,30 @@ def main():
                 iteration_metric = st.empty()
 
             # Initialize crew
+            logger.info("Initializing crew...")
             crew_instance = LogsAreAllYouNeed()
-            crew = crew_instance.crew()
-
+            
             while True:
                 st.session_state.iteration += 1
                 status_text.text(f"Iteration {st.session_state.iteration} in progress...")
                 iteration_metric.metric("Current Iteration", st.session_state.iteration)
 
                 try:
-                    # Start the crew with topic and logs
-                    logs = ""  # You can update this if you want to pass previous logs
-                    inputs = {
-                        "topic": topic,
-                        "logs": logs
-                    }
-                    crew.kickoff(inputs=inputs)
+                    # Run crew with topic
+                    logger.info(f"Running crew with topic: {topic}")
+                    crew = crew_instance.run(topic=topic)
 
                     # Update the UI with latest outputs
-                    code_content = read_file_content("outputs/codebase.py")
+                    code_content = read_file_content("codebase.py")
                     code_placeholder.code(code_content, language="python")
 
-                    tests_content = read_file_content("outputs/unit_tests.py")
+                    tests_content = read_file_content("unit_tests.py")
                     tests_placeholder.code(tests_content, language="python")
 
-                    results_content = read_file_content("outputs/tests_results.md")
+                    results_content = read_file_content("tests_results.md")
                     results_placeholder.markdown(results_content)
 
-                    exit_content = read_file_content("outputs/exit_task_output.md")
+                    exit_content = read_file_content("exit_task_output.md")
                     exit_placeholder.markdown(f"Exit Status: {exit_content}")
 
                     # Check if we should exit
@@ -124,18 +128,19 @@ def main():
                         progress_bar.progress(100)
                         break
 
-                    # Update progress (showing continuous progress)
+                    # Update progress
                     progress = min(90, st.session_state.iteration * 20)
                     progress_bar.progress(progress)
 
                 except Exception as e:
+                    logger.error(f"Error during execution: {e}", exc_info=True)
                     st.error(f"Error during execution: {str(e)}")
                     break
 
-                # Small delay to prevent UI freezing
                 time.sleep(1)
 
         except Exception as e:
+            logger.error(f"Failed to initialize crew: {e}", exc_info=True)
             st.error(f"Failed to initialize crew: {str(e)}")
 
     # Display total iterations in sidebar
@@ -143,4 +148,4 @@ def main():
         st.sidebar.metric("Total Iterations", st.session_state.iteration)
 
 if __name__ == "__main__":
-    main() 
+    main()
