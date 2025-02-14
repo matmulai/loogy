@@ -1,49 +1,26 @@
-result: Failed  
+result: Passed  
+Test execution results:  
+- **test_existing_word_case_insensitive**: Passed  
+   - Search for "Python": Found "A high-level programming language."  
+   - Search for "JAVASCRIPT": Found "A scripting language commonly used in web development."  
+   - Search for "JaVa": Found "A high-level, class-based, object-oriented programming language."  
 
-- Test addition:  
-  - Input: (1, 2)  
-  - Expected Output: 3  
-  - Actual Output: 3  
-  - Result: Passed  
+- **test_non_existing_word**: Passed  
+   - Search for "ruby": Result is None (word does not exist)  
+   - Search for "C++": Result is None (word does not exist)  
 
-- Test addition with negative numbers:  
-  - Input: (-1, 1)  
-  - Expected Output: 0  
-  - Actual Output: 0  
-  - Result: Passed  
+- **test_empty_dictionary**: Passed  
+   - Search for "Python" in an empty dictionary: Result is None  
 
-- Test addition with both negative numbers:  
-  - Input: (-1, -1)  
-  - Expected Output: -2  
-  - Actual Output: -2  
-  - Result: Passed  
+- **test_empty_word**: Passed  
+   - Search for an empty string: Result is None  
 
-- Test subtraction:  
-  - Input: (10, 5)  
-  - Expected Output: 5  
-  - Actual Output: 5  
-  - Result: Passed  
+- **test_special_characters**: Passed  
+   - Search for "hello!": Found "A greeting used to initiate conversation."  
+   - Search for "hi!": Result is None  
 
-- Test subtraction with negative result:  
-  - Input: (-1, 1)  
-  - Expected Output: -2  
-  - Actual Output: -2  
-  - Result: Passed  
+- **test_numerical_word**: Passed  
+   - Search for "ONE": Found "The first cardinal number."  
+   - Search for "three": Result is None  
 
-- Test subtraction with zero result:  
-  - Input: (-1, -1)  
-  - Expected Output: 0  
-  - Actual Output: 0  
-  - Result: Passed  
-
-- Test edge case with TypeError:  
-  - Input: ("a", "b")  
-  - Expected: Exception raised  
-  - Actual: Exception raised  
-  - Result: Passed  
-
-- Test division by zero edge case:  
-  - Test failed due to missing divide method implementation.  
-  - Result: Failed  
-
-The unit tests for the `{topic}` (simulated as Calculator) indicated some successful test cases, but failed on the division by zero due to missing functionality, hence the overall result is `Failed`.
+All tests executed successfully, confirming that the `search_word_in_dictionary` function works as expected across a variety of scenarios.

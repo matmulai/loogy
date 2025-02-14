@@ -179,3 +179,6 @@ logs/
 
 # Outputs
 outputs/
+
+# PRD
+instructions/prd.md

@@ -1,151 +1,108 @@
 import streamlit as st
 import os
+from pathlib import Path
 import time
 from crew import LogsAreAllYouNeed
-import openai
 from dotenv import load_dotenv
 import logging
+
+# Initialize logging
 logger = logging.getLogger(__name__)
-# Load environment variables from .env file
-load_dotenv()
+logging.basicConfig(level=logging.INFO)
 
-# Set page config to wide mode
-st.set_page_config(layout="wide")
+# Load environment variables from the correct path
+env_path = Path(__file__).parent.parent.parent / ".env"
+load_dotenv(env_path)
+logger.info(f"Loading .env from: {env_path}")
 
-def read_file_content(file_path):
-    """Read and return file content if it exists"""
-    crew_instance = LogsAreAllYouNeed()
-    absolute_path = crew_instance.get_output_path(os.path.basename(file_path))
-    if os.path.exists(absolute_path):
-        with open(absolute_path, 'r') as f:
-            return f.read()
-    return "File not generated yet..."
 
 def main():
-    # Configure logging
-    logging.basicConfig(level=logging.INFO)
-    
+    st.set_page_config(layout="wide")
     st.title("Logs Are All You Need")
 
-    # API Key input in sidebar
-    with st.sidebar:
-        api_key = os.getenv("OPENAI_API_KEY", "")  # Get the API key from .env
-        if not api_key:  # Only show input if the key is not available
-            api_key = st.text_input("Enter OpenAI API Key:", type="password", value="")
-            st.caption("Your API key is not stored and will be used only for this session")
-        else:
-            st.caption("OpenAI API Key loaded from .env file.")  # Indicate that the key is loaded
-
-    # Initialize session state for tracking iterations and topic
-    if 'iteration' not in st.session_state:
-        st.session_state.iteration = 0
-    if 'topic' not in st.session_state:
-        st.session_state.topic = "Write merge sort"
-
-    # Topic input with description
-    st.markdown("### Configure Your Project")
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        topic = st.text_input(
-            "Query:",
-            value=st.session_state.topic,
-            help="Specify the topic you want the AI to analyze and develop"
-        )
-    with col2:
-        # Start button (disabled if no API key)
-        start_button = st.button("Execute", disabled=not api_key, use_container_width=True)
+    # API Key management
+    api_key = os.getenv("OPENAI_API_KEY")
+    logger.info(f"API key loaded from env: {'Yes' if api_key else 'No'}")
 
     if not api_key:
-        st.warning("Please enter your OpenAI API key in the sidebar to start")
+        api_key = st.sidebar.text_input("OpenAI API Key:", type="password")
+        logger.info("Falling back to sidebar input for API key")
 
-    if start_button and api_key:
-        # Save topic to session state
-        st.session_state.topic = topic
-        logger.info(f"Topic set to: {topic}")
+    if not api_key:
+        st.warning("Please provide an OpenAI API key in the sidebar to continue")
+        return
 
-        # Set the API key
+    # Session state initialization
+    if "iteration" not in st.session_state:
+        st.session_state.iteration = 0
+    if "topic" not in st.session_state:
+        st.session_state.topic = "Search a word in a dictionary"
+
+    # UI Components
+    topic = st.text_input("Development Task:", value=st.session_state.topic)
+    start_button = st.button("Start Development Process")
+
+    if start_button:
         os.environ["OPENAI_API_KEY"] = api_key
-        logger.info("API key set")
+        st.session_state.topic = topic
+
+        # Initialize UI containers
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.subheader("Generated Code")
+            code_display = st.empty()
+
+        with col2:
+            st.subheader("Test Results")
+            test_results = st.empty()
+
+        # Initialize crew
+        crew = LogsAreAllYouNeed()
 
         try:
-            # Create three columns for outputs
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-                st.subheader("Developer Output")
-                code_placeholder = st.empty()
-
-            with col2:
-                st.subheader("Tester Output")
-                tests_placeholder = st.empty()
-
-            with col3:
-                st.subheader("Test Results")
-                results_placeholder = st.empty()
-
-                st.subheader("Exit Status")
-                exit_placeholder = st.empty()
-
-            # Progress section
-            st.markdown("### Progress")
-            progress_col1, progress_col2 = st.columns([3, 1])
-            with progress_col1:
-                progress_bar = st.progress(0)
-                status_text = st.empty()
-            with progress_col2:
-                iteration_metric = st.empty()
-
-            # Initialize crew
-            logger.info("Initializing crew...")
-            crew_instance = LogsAreAllYouNeed()
-            
-            while True:
+            while st.session_state.iteration < 3:
                 st.session_state.iteration += 1
-                status_text.text(f"Iteration {st.session_state.iteration} in progress...")
-                iteration_metric.metric("Current Iteration", st.session_state.iteration)
+                status_text.text(
+                    f"Iteration {st.session_state.iteration} in progress..."
+                )
+                progress_bar.progress(st.session_state.iteration * 33)
+
+                # Execute crew
+                crew.run(topic=topic)
+
+                # Display outputs
+                try:
+                    # Read codebase.py
+                    code_path = crew.get_output_path("codebase.py")
+                    with open(code_path, "r") as f:
+                        code_content = f.read()
+                    code_display.code(code_content, language="python")
+                except Exception as e:
+                    code_display.error(f"Error reading codebase: {str(e)}")
 
                 try:
-                    # Run crew with topic
-                    logger.info(f"Running crew with topic: {topic}")
-                    crew = crew_instance.run(topic=topic)
-
-                    # Update the UI with latest outputs
-                    code_content = read_file_content("codebase.py")
-                    code_placeholder.code(code_content, language="python")
-
-                    tests_content = read_file_content("unit_tests.py")
-                    tests_placeholder.code(tests_content, language="python")
-
-                    results_content = read_file_content("tests_results.md")
-                    results_placeholder.markdown(results_content)
-
-                    exit_content = read_file_content("exit_task_output.md")
-                    exit_placeholder.markdown(f"Exit Status: {exit_content}")
-
-                    # Check if we should exit
-                    if exit_content.strip().lower() == "true":
-                        status_text.text("✅ All tests passed! Process complete.")
-                        progress_bar.progress(100)
-                        break
-
-                    # Update progress
-                    progress = min(90, st.session_state.iteration * 20)
-                    progress_bar.progress(progress)
-
+                    # Read tests_results.md
+                    test_path = crew.get_output_path("tests_results.md")
+                    with open(test_path, "r") as f:
+                        test_content = f.read()
+                    test_results.markdown(test_content)
                 except Exception as e:
-                    logger.error(f"Error during execution: {e}", exc_info=True)
-                    st.error(f"Error during execution: {str(e)}")
+                    test_results.error(f"Error reading test results: {str(e)}")
+
+                if crew.exit_flag:
+                    status_text.success("All tests passed successfully!")
+                    progress_bar.progress(100)
                     break
 
                 time.sleep(1)
 
         except Exception as e:
-            logger.error(f"Failed to initialize crew: {e}", exc_info=True)
-            st.error(f"Failed to initialize crew: {str(e)}")
+            st.error(f"Process failed: {str(e)}")
+            logger.error(f"Execution error: {str(e)}", exc_info=True)
 
-    # Display total iterations in sidebar
-    if st.session_state.iteration > 0:
-        st.sidebar.metric("Total Iterations", st.session_state.iteration)
 
 if __name__ == "__main__":
     main()

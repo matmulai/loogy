@@ -1,31 +1,49 @@
 write_unit_tests_task:
   description: >
-    Write unit tests for {topic}
-    Make sure you write unit tests for all the functions and methods in the codebase.
+    Write comprehensive unit tests for the code implementing {topic}.
+    The code is available in the codebase.py file.
+    
+    Ensure:
+    1. All functions are tested
+    2. Edge cases are covered
+    3. Tests are well-documented
   expected_output: >
-    A list of unit tests for {topic}
+    Complete set of unit tests for the implementation
   agent: tester
 
 execute_unit_tests_task:
   description: >
-    Execute unit tests for {topic}
-    Make sure you execute all the unit tests for {topic}.
+    Execute the unit tests and provide results.
+    
+    Important: The first line of your output must start with either:
+    "result: Passed" - if all tests pass
+    "result: Failed" - if any test fails
+    
+    Follow this with detailed test execution results.
   expected_output: >
-    A list of results for the unit tests for {topic}, and a single word summary at the top
-    "result: Passed" if all tests passed or "result: Failed" if any tests failed
+    Test execution results with pass/fail status
   agent: executor
 
 develop_topic_task:
   description: >
-    Develop {topic}
-    Make sure you develop {topic} given the requirements and {logs} for known issues.
+    You are tasked with developing Python code for {topic}.
+    Previous execution logs (if any): {logs}
+    
+    Write clean, efficient, and well-documented Python code.
+    Include docstrings and type hints where appropriate.
   expected_output: >
-    The fully developed {topic}
+    Python implementation of the requested functionality
   agent: developer
 
 exit_task:
   description: >
-    Check the first line of outputs/tests_results.md.
-    If it contains "result: Passed", return True.
-    If it contains "result: Failed", return False.
+    Check the test execution results in tests_results.md.
+    
+    Return:
+    - True if the first line contains "result: Passed"
+    - False if the first line contains "result: Failed"
+    
+    This will determine if the crew should exit or continue development.
+  expected_output: >
+    Boolean indicating whether all tests passed
   agent: exit_agent
