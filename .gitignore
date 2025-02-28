@@ -218,3 +218,7 @@ outputs/
 
 # PRD
 instructions/*
+
+# Data
+data/*
+results/*

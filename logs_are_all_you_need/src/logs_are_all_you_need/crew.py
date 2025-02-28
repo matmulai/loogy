@@ -25,21 +25,21 @@ class LogsAreAllYouNeed(Flow):
     tasks_config = "config/tasks.yaml"
     exit_flag = False
 
-    def __init__(self, model_provider="Ollama", model_name="qwen2.5-coder:14b"):
+    def __init__(self, model_provider="Ollama", model_name="qwen2.5-coder:7b"):
         super().__init__()
-        
+
         # Simply use "outputs" directory in the current working directory
         self.outputs_dir = Path("outputs")
-        
+
         # Create outputs directory if it doesn't exist
         os.makedirs(self.outputs_dir, exist_ok=True)
         logger.info(f"Outputs directory: {self.outputs_dir}")
-        
+
         # Store model configuration
         self.model_provider = model_provider
         self.model_name = model_name
         logger.info(f"Using model provider: {model_provider}, model: {model_name}")
-        
+
         # Initialize inputs
         self.inputs = {}
         self.tasks = []
@@ -63,14 +63,14 @@ class LogsAreAllYouNeed(Flow):
     @start()
     def developer(self) -> Agent:
         config = self.agents_config["developer"].copy()
-        
+
         # Override the model based on user selection
         if self.model_provider == "Ollama":
             config["llm"] = f"ollama/{self.model_name}"  # Add 'ollama/' prefix
             config["api_type"] = "ollama"
         else:
             config["llm"] = self.model_name
-            
+
         agent = Agent(config=config, verbose=True)
         print(f"\n🤖 Developer using model: {config['llm']}")
         return agent
@@ -79,14 +79,14 @@ class LogsAreAllYouNeed(Flow):
     @listen(developer)
     def tester(self) -> Agent:
         config = self.agents_config["tester"].copy()
-        
+
         # Override the model based on user selection
         if self.model_provider == "Ollama":
             config["llm"] = f"ollama/{self.model_name}"  # Add 'ollama/' prefix
             config["api_type"] = "ollama"
         else:
             config["llm"] = self.model_name
-            
+
         agent = Agent(config=config, verbose=True)
         print(f"\n🤖 Tester using model: {config['llm']}")
         return agent
@@ -95,14 +95,14 @@ class LogsAreAllYouNeed(Flow):
     @listen(tester)
     def executor(self) -> Agent:
         config = self.agents_config["executor"].copy()
-        
+
         # Override the model based on user selection
         if self.model_provider == "Ollama":
             config["llm"] = f"ollama/{self.model_name}"  # Add 'ollama/' prefix
             config["api_type"] = "ollama"
         else:
             config["llm"] = self.model_name
-            
+
         agent = Agent(config=config, verbose=True)
         print(f"\n🤖 Executor using model: {config['llm']}")
         return agent
@@ -111,14 +111,14 @@ class LogsAreAllYouNeed(Flow):
     @listen(executor)
     def exit_agent(self) -> Agent:
         config = self.agents_config["exit_agent"].copy()
-        
+
         # Override the model based on user selection
         if self.model_provider == "Ollama":
             config["llm"] = f"ollama/{self.model_name}"  # Add 'ollama/' prefix
             config["api_type"] = "ollama"
         else:
             config["llm"] = self.model_name
-            
+
         agent = Agent(config=config, verbose=True)
         print(f"\n🤖 Exit Agent using model: {config['llm']}")
         return agent
@@ -233,12 +233,12 @@ class LogsAreAllYouNeed(Flow):
                     test_results = f.read()
                     first_line = test_results.strip().split('\n')[0]
                 logger.info(f"Test results first line: '{first_line}' (for verification)")
-                
+
                 # Double-check if test results indicate passing
                 if "result: passed" in first_line.lower():
                     self.exit_flag = True
                     logger.info("Test results indicate PASS, setting exit_flag to True")
-                    
+
                     # Update the exit file with the new status
                     with open(exit_file_path, "w") as f:
                         f.write(str(self.exit_flag))
@@ -295,7 +295,7 @@ class LogsAreAllYouNeed(Flow):
         logger.info(f"Outputs directory: {self.outputs_dir}")
         logger.info(f"Outputs directory exists: {os.path.exists(self.outputs_dir)}")
         logger.info(f"Outputs directory is dir: {os.path.isdir(self.outputs_dir)}")
-        
+
         # Check if we can write to the outputs directory
         try:
             test_file = os.path.join(self.outputs_dir, "test_write.txt")
@@ -306,7 +306,7 @@ class LogsAreAllYouNeed(Flow):
             logger.info(f"Successfully removed test file: {test_file}")
         except Exception as e:
             logger.error(f"Error writing to outputs directory: {e}", exc_info=True)
-        
+
         # List all files in the outputs directory
         try:
             if os.path.exists(self.outputs_dir):
@@ -363,15 +363,15 @@ class LogsAreAllYouNeed(Flow):
         logger.info(f"Set inputs with topic and logs (logs length: {len(logs)})")
 
         crew = self.crew()
-        iteration_count = 0
+        self.iteration_count = 0  # Track iteration count as an instance variable
         
         # Reset exit flag at the start of a new run
         self.exit_flag = False
         
-        while iteration_count < max_iterations and not self.exit_flag:
-            iteration_count += 1
-            logger.info(f"\n=== Starting iteration {iteration_count} ===")
-            logger.info(f"\n🔄 Starting iteration {iteration_count}...")
+        while self.iteration_count < max_iterations and not self.exit_flag:
+            self.iteration_count += 1
+            logger.info(f"\n=== Starting iteration {self.iteration_count} ===")
+            logger.info(f"\n🔄 Starting iteration {self.iteration_count}...")
             logger.info(f"🎯 Current topic: {topic}")
 
             try:
@@ -408,6 +408,12 @@ class LogsAreAllYouNeed(Flow):
                 if self.exit_flag:
                     logger.info("🎉 Exit flag is True - tests passed successfully!")
                     logger.info("\n✅ Tests passed successfully! Exiting crew.\n")
+                    
+                    # Save the final iteration count
+                    with open(self.get_output_path("iteration_count.txt"), 'w') as f:
+                        f.write(str(self.iteration_count))
+                    logger.info(f"Saved final iteration count: {self.iteration_count}")
+                    
                     return crew
                 else:
                     logger.info("❌ Tests failed or exit flag not set")
@@ -415,6 +421,11 @@ class LogsAreAllYouNeed(Flow):
             except Exception as e:
                 logger.error(f"Error during iteration: {e}", exc_info=True)
                 break
+        
+        # Save the final iteration count even if we didn't succeed
+        with open(self.get_output_path("iteration_count.txt"), 'w') as f:
+            f.write(str(self.iteration_count))
+        logger.info(f"Saved final iteration count: {self.iteration_count}")
 
         return crew
 
@@ -428,13 +439,13 @@ class LogsAreAllYouNeed(Flow):
                 "tests_results.md",
                 "exit_task_output.md"
             ]
-            
+
             for filename in required_files:
                 file_path = os.path.join(str(self.outputs_dir), filename)
                 if not os.path.exists(file_path):
                     # Create directory if it doesn't exist
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
-                    
+
                     # Create empty file with appropriate content
                     if filename.endswith(".py"):
                         content = "# No code generated yet"
@@ -442,11 +453,11 @@ class LogsAreAllYouNeed(Flow):
                         content = "*No content available yet*"
                     else:
                         content = ""
-                    
+
                     with open(file_path, "w") as f:
                         f.write(content)
                     logger.info(f"Created empty file: {file_path}")
-            
+
             logger.info("Ensured all required output files exist")
         except Exception as e:
-            logger.error(f"Error ensuring output files exist: {e}") 
+            logger.error(f"Error ensuring output files exist: {e}")
