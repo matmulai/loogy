@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from pathlib import Path
 import time
-from crew import LogsAreAllYouNeed
+from logs_are_all_you_need.crew import LogsAreAllYouNeed
 from dotenv import load_dotenv
 import logging
 
@@ -20,17 +20,44 @@ def main():
     st.set_page_config(layout="wide")
     st.title("Logs Are All You Need")
 
-    # API Key management
-    api_key = os.getenv("OPENAI_API_KEY")
-    logger.info(f"API key loaded from env: {'Yes' if api_key else 'No'}")
+    # Sidebar for configuration
+    st.sidebar.title("Configuration")
 
-    if not api_key:
-        api_key = st.sidebar.text_input("OpenAI API Key:", type="password")
-        logger.info("Falling back to sidebar input for API key")
+    # Model selection
+    model_provider = st.sidebar.radio(
+        "Model Provider", options=["Ollama", "OpenAI"], index=0
+    )
 
-    if not api_key:
-        st.warning("Please provide an OpenAI API key in the sidebar to continue")
-        return
+    if model_provider == "Ollama":
+        model_name = st.sidebar.selectbox(
+            "Ollama Model",
+            options=[
+                "qwen2.5-coder:7b",
+                "qwen2.5-coder:14b",
+                "llama3:8b",
+                "mistral:7b",
+                "codellama:7b",
+            ],
+            index=0,
+        )
+        api_base = st.sidebar.text_input(
+            "Ollama API Base", value="http://localhost:11434"
+        )
+        api_key = "not-needed-for-ollama"
+        os.environ["OLLAMA_API_BASE"] = api_base
+    else:
+        model_name = st.sidebar.selectbox(
+            "OpenAI Model", options=["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"], index=0
+        )
+        # API Key management
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            api_key = st.sidebar.text_input("OpenAI API Key:", type="password")
+            if not api_key:
+                st.warning(
+                    "Please provide an OpenAI API key in the sidebar to continue"
+                )
+                return
 
     # Session state initialization
     if "iteration" not in st.session_state:
@@ -48,21 +75,43 @@ def main():
         st.session_state.last_topic = None
 
     # UI Components
-    topic = st.text_input("Development Task:", value=st.session_state.topic)
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        topic = st.text_input("Development Task:", value=st.session_state.topic)
+    with col2:
+        clear_button = st.button("🗑️ Clear Outputs")
+
     start_button = st.button("Start Development Process")
 
-    if start_button:
-        os.environ["OPENAI_API_KEY"] = api_key
-        
-        # Initialize crew
+    if clear_button:
+        # Initialize crew just to use clean_outputs_directory
         crew = LogsAreAllYouNeed()
+        crew.clean_outputs_directory()
+        st.session_state.iteration = 0
+        st.success("✨ Outputs directory cleared!")
+        logger.info("Outputs directory cleared via clear button")
+
+    if start_button:
+        if model_provider == "OpenAI":
+            os.environ["OPENAI_API_KEY"] = api_key
+
+        # Initialize crew
+        crew = LogsAreAllYouNeed(model_provider=model_provider, model_name=model_name)
         
+        # Debug paths
+        crew.debug_paths()
+        
+        # Ensure output files exist
+        crew.ensure_output_files_exist()
+
         # Clean outputs if topic changed
         if st.session_state.last_topic != topic:
-            logger.info(f"Topic changed from '{st.session_state.last_topic}' to '{topic}'")
+            logger.info(
+                f"Topic changed from '{st.session_state.last_topic}' to '{topic}'"
+            )
             crew.clean_outputs_directory()
             st.session_state.iteration = 0
-        
+
         st.session_state.topic = topic
         st.session_state.last_topic = topic
 
@@ -94,20 +143,34 @@ def main():
                 try:
                     # Read codebase.py
                     code_path = crew.get_output_path("codebase.py")
+                    if not os.path.exists(code_path):
+                        # Create empty file if it doesn't exist
+                        with open(code_path, "w") as f:
+                            f.write("# No code generated yet")
+                        logger.warning(f"Created empty file at {code_path}")
+                    
                     with open(code_path, "r") as f:
                         code_content = f.read()
                     code_display.code(code_content, language="python")
                 except Exception as e:
                     code_display.error(f"Error reading codebase: {str(e)}")
+                    logger.error(f"Error reading codebase: {str(e)}", exc_info=True)
 
                 try:
                     # Read tests_results.md
                     test_path = crew.get_output_path("tests_results.md")
+                    if not os.path.exists(test_path):
+                        # Create empty file if it doesn't exist
+                        with open(test_path, "w") as f:
+                            f.write("*No test results available yet*")
+                        logger.warning(f"Created empty file at {test_path}")
+                    
                     with open(test_path, "r") as f:
                         test_content = f.read()
                     test_results.markdown(test_content)
                 except Exception as e:
                     test_results.error(f"Error reading test results: {str(e)}")
+                    logger.error(f"Error reading test results: {str(e)}", exc_info=True)
 
                 if crew.exit_flag:
                     status_text.success("All tests passed successfully!")

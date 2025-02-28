@@ -1,10 +1,46 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Output files
+outputs/
+
+# Environment variables
+.env
+
+# OS specific
+.DS_Store
 
 # Distribution / packaging
 .Python
@@ -181,4 +217,4 @@ logs/
 outputs/
 
 # PRD
-instructions/prd.md
+instructions/*

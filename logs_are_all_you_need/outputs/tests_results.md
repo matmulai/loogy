@@ -1,12 +1,12 @@
-result: Passed
----------------------------
-Test Results:
-1. test_generate_classification_data: Passed
-2. test_preprocess_data: Passed
-3. test_train_model: Passed
-4. test_evaluate_model: Passed
-5. test_train_model_edge_case: Passed
-6. test_evaluate_model_edge_case: Passed
+result: Failed
+```
+test_load_and_transform_data (unittest.loader._FailedTest): 
+ImportError: cannot import name 'load_and_transform_data' from '__main__' (/path/to/your/test_file.py)
+test_train_and_evaluate_model (unittest.loader._FailedTest): 
+ImportError: cannot import name 'train_and_evaluate_model' from '__main__' (/path/to/your/test_file.py)
 
-All tests executed successfully with no failures. The unit tests confirm that data generation, preprocessing, model training, and evaluation work as intended, including handling of edge cases. 
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (errors=2)
 ```

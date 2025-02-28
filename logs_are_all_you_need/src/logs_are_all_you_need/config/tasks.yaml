@@ -1,3 +1,13 @@
+develop_topic_task:
+  description: >
+    You are tasked with developing Python code for {topic}.
+    Previous execution logs : {logs}
+    Write clean, efficient, and well-documented Python code.
+    Include docstrings and type hints where appropriate.
+  expected_output: >
+    Python implementation of the requested functionality
+  agent: developer
+
 write_unit_tests_task:
   description: >
     Write comprehensive unit tests for the code implementing {topic}.
@@ -21,16 +31,6 @@ execute_unit_tests_task:
     Test execution results with pass/fail status
   agent: executor
 
-develop_topic_task:
-  description: >
-    You are tasked with developing Python code for {topic}.
-    Previous execution logs : {logs}
-    Write clean, efficient, and well-documented Python code.
-    Include docstrings and type hints where appropriate.
-  expected_output: >
-    Python implementation of the requested functionality
-  agent: developer
-
 exit_task:
   description: >
     Check the test execution results in tests_results.md.
@@ -41,3 +41,7 @@ exit_task:
   expected_output: >
     Boolean indicating whether all tests passed
   agent: exit_agent
+
+### TODO: Add logging in unit tests
+### TODO: Add logging in codebase
+### TODO: Add logging in app.py
