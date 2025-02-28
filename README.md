@@ -6,6 +6,7 @@ Today, the GenAI coding assistants are good enough to produce excellent proposal
 ```bash
 cd logs_are_all_you_need
 streamlit run logs_are_all_you_need/src/logs_are_all_you_need/app.py
+python src/logs_are_all_you_need/process_dataset.py # Process the dataset
 ```
 
 The app allows you to:

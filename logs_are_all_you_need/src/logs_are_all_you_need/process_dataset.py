@@ -37,14 +37,13 @@ def process_dataset(data_path, model_provider="Ollama", model_name="qwen2.5-code
         logger.info(f"\n\n=== Processing problem {problem_id} ===")
 
         # Check if required fields exist
-        if "buggy_code" not in problem_data["buggy_versions"][0] or "prompt" not in problem_data:
+        if "buggy_code" not in problem_data or "prompt" not in problem_data:
             logger.warning(f"Problem {problem_id} missing required fields, skipping")
             continue
-        #FIXME: Only looks at the first buggy version, will silently fail if there are multiple buggy versions
-        buggy_code = problem_data["buggy_versions"][0]["buggy_code"]
+        buggy_code = problem_data["buggy_code"]
         reference_code = problem_data["reference_code"]
 
-        # Process buggy_code
+        # Process buggy_codef
         logger.info(f"Processing buggy_code for problem {problem_id}")
         process_entry(problem_id, "buggy_code", buggy_code, model_provider, model_name, results)
 
