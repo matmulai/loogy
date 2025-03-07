@@ -1,0 +1,24 @@
+[project]
+name = "loogy"
+version = "0.1.0"
+description = "Auto-append logs, etc., to your call to GenAI using crewAI"
+authors = [{ name = "Atul Dhingra", email = "dhingra.atul92@gmail.com" },
+          { name = "Gaurav Sood", email = "gsood07@gmail.com" }]
+requires-python = ">=3.10,<3.12"
+dependencies = [
+    "crewai[tools]>=0.98.0,<1.0.0"
+]
+
+[project.scripts]
+loogy = "loogy.main:run"
+run_crew = "loogy.main:run"
+train = "loogy.main:train"
+replay = "loogy.main:replay"
+test = "loogy.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"

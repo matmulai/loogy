@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="logs_are_all_you_need",
+    name="loogy",
     version="0.1.0",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
@@ -24,4 +24,4 @@ setup(
     },
     author="Atul Dhingra and Gaurav Sood",
     description="A CrewAI-powered development system that uses logs to iteratively improve code",
-) 
+)

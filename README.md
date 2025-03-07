@@ -1,12 +1,12 @@
-## LogChange
+## loogy: auto-refine code by adding logs and stack trace
 
-Today, the GenAI coding assistants are good enough to produce excellent proposals for even complex problems. But except for the simplest of cases, it is rare for them to be one shot. This means that developers working with GenAI spend a fair bit of time refining the proposal. Often, developers send the stacktrace or logs to direct attention to specific issues. But the process is mechanical and it's value is slightly unproven. More generally, there are three signals that can improve the quality of proposals for refining code: 1. Stacktrace, 2. Logs, and 3. Outputs from CI/CD. We make it easier to incorporate the first two signals and let the GenAI iterate till we see no errors or for a specific number of iterations. 
+Today, the GenAI coding assistants are good enough to produce excellent proposals for even complex problems. But except for the simplest of cases, they rarely get it right the first time. Hence, the modal GenAI chat when coding is a refinement call in which the developers send the stack trace or logs to direct attention to specific issues. We can, however,  automate and improve it. When programmers evaluate a solution, they rely on 1. outputs of static analysis, 2. stack trace, 3. structured logs, and 4. outputs from CI/CD. We build a tool that automatically appends these outputs for a Python program and lets the GenAI iterate till there are no errors or until the maximum number of iterations is reached.
 
 ### Run
 ```bash
-cd logs_are_all_you_need
-streamlit run logs_are_all_you_need/src/logs_are_all_you_need/app.py
-python src/logs_are_all_you_need/process_dataset.py # Process the dataset
+cd loogy
+streamlit run loogy/src/loogy/app.py
+python src/loogy/process_dataset.py # Process the dataset
 ```
 
 The app allows you to:
@@ -19,10 +19,10 @@ The app allows you to:
 ## Project Structure
 
 ```
-logs_are_all_you_need/
+loogy/
 ├── outputs/                  # Generated outputs
 ├── src/
-│   └── logs_are_all_you_need/
+│   └── loogy/
 │       ├── app.py            # Streamlit application
 │       ├── crew.py           # CrewAI implementation
 │       ├── config/
