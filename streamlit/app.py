@@ -18,7 +18,7 @@ logger.info(f"Loading .env from: {env_path}")
 
 def main():
     st.set_page_config(layout="wide")
-    st.title("Logs Are All You Need")
+    st.title("Loogy")
 
     # Sidebar for configuration
     st.sidebar.title("Configuration")
