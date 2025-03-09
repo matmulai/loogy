@@ -4,6 +4,10 @@ Today, the GenAI coding assistants are good enough to produce excellent proposal
 
 When programmers evaluate a solution, they rely on 1. outputs of static analysis, 2. stack trace, 3. structured logs, and 4. outputs from CI/CD to pin point which tests are failing for what reason. We build a tool that automatically appends these outputs for a Python program and lets the GenAI iterate till there are no errors or until the maximum number of iterations is reached. 
 
+### Streamlit
+
+https://loogyai.streamlit.app/
+
 ### Run
 
 ```bash
