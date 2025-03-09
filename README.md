@@ -1,8 +1,11 @@
 ## loogy: auto-refine code by adding logs and stack trace
 
-Today, the GenAI coding assistants are good enough to produce excellent proposals for even complex problems. But except for the simplest of cases, they rarely get it right the first time. Hence, the modal GenAI chat when coding is a refinement call in which the developers send the stack trace or logs to direct attention to specific issues. We can, however,  automate and improve it. When programmers evaluate a solution, they rely on 1. outputs of static analysis, 2. stack trace, 3. structured logs, and 4. outputs from CI/CD. We build a tool that automatically appends these outputs for a Python program and lets the GenAI iterate till there are no errors or until the maximum number of iterations is reached.
+Today, the GenAI coding assistants are good enough to produce excellent proposals for even complex problems. But except for the simplest of cases, they rarely get it right the first time. Hence, the modal GenAI chat when coding is a refinement call in which the developers send the stack trace or logs to direct attention to specific issues. We can, however, automate and improve it. 
+
+When programmers evaluate a solution, they rely on 1. outputs of static analysis, 2. stack trace, 3. structured logs, and 4. outputs from CI/CD to pin point which tests are failing for what reason. We build a tool that automatically appends these outputs for a Python program and lets the GenAI iterate till there are no errors or until the maximum number of iterations is reached. 
 
 ### Run
+
 ```bash
 cd loogy
 streamlit run loogy/src/loogy/app.py
