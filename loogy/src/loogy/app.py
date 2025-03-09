@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from pathlib import Path
 import time
-from logs_are_all_you_need.crew import LogsAreAllYouNeed
+from loogy.crew import LogsAreAllYouNeed
 from dotenv import load_dotenv
 import logging
 
