@@ -42,6 +42,29 @@ exit_task:
     Boolean indicating whether all tests passed
   agent: exit_agent
 
-### TODO: Add logging in unit tests
-### TODO: Add logging in codebase
-### TODO: Add logging in app.py
+add_logging_in_unit_tests_task:
+  description: >
+    Integrate logging into the unit tests.
+    The unit tests should log detailed information about their execution,
+    including debug messages and errors, to a dedicated log file.
+  expected_output: >
+    Unit tests generate a log file with comprehensive execution details.
+  agent: developer
+
+add_logging_in_codebase_task:
+  description: >
+    Integrate logging into the main codebase.
+    Configure Python's logging module to capture key events, errors, and debug
+    information, outputting logs to both the console and a log file.
+  expected_output: >
+    The codebase produces consistent and useful log output for key events and errors.
+  agent: developer
+
+add_linting_task:
+  description: >
+    Set up linting for the project using a tool such as pylint or flake8.
+    Configure the linter to enforce PEP 8 standards and integrate linting into
+    the CI pipeline.
+  expected_output: >
+    Linting is integrated and no critical linting issues remain.
+  agent: developer
