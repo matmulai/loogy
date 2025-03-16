@@ -14,6 +14,7 @@ logger.setLevel(logging.INFO)
 # https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
 MAX_ITERATIONS = 3
 
+
 @CrewBase
 class LogsAreAllYouNeed(Flow):
     """LogsAreAllYouNeed crew"""
@@ -48,7 +49,7 @@ class LogsAreAllYouNeed(Flow):
     def get_output_path(self, filename: str) -> str:
         """Get absolute path for output files"""
         # Remove any 'outputs/' prefix if present
-        clean_filename = filename.replace('outputs/', '')
+        clean_filename = filename.replace("outputs/", "")
         return str(self.outputs_dir / clean_filename)
 
     def set_inputs(self, inputs: dict) -> None:
@@ -147,7 +148,7 @@ class LogsAreAllYouNeed(Flow):
             description=description.format(**format_vars),
             expected_output=expected_output.format(**format_vars),
             agent=self.developer(),
-            output_file=output_file
+            output_file=output_file,
         )
 
     @task
@@ -166,13 +167,15 @@ class LogsAreAllYouNeed(Flow):
             description=description.format(**format_vars),
             expected_output=expected_output.format(**format_vars),
             agent=self.tester(),
-            output_file=output_file
+            output_file=output_file,
         )
 
     @task
     def execute_unit_tests_task(self) -> Task:
         description = self.tasks_config["execute_unit_tests_task"]["description"]
-        expected_output = self.tasks_config["execute_unit_tests_task"]["expected_output"]
+        expected_output = self.tasks_config["execute_unit_tests_task"][
+            "expected_output"
+        ]
 
         format_vars = {"topic": self.inputs.get("topic", "default topic"), "logs": ""}
         format_vars.update(self.inputs)
@@ -203,7 +206,7 @@ class LogsAreAllYouNeed(Flow):
             input_file=input_file,
             agent=self.exit_agent(),
             output_parser=self.parse_exit_task_output,
-            output_file=output_file
+            output_file=output_file,
         )
 
     def parse_exit_task_output(self, output: str) -> str:
@@ -229,10 +232,12 @@ class LogsAreAllYouNeed(Flow):
             # Log test results file content for debugging
             try:
                 test_results_path = self.get_output_path("tests_results.md")
-                with open(test_results_path, 'r') as f:
+                with open(test_results_path, "r") as f:
                     test_results = f.read()
-                    first_line = test_results.strip().split('\n')[0]
-                logger.info(f"Test results first line: '{first_line}' (for verification)")
+                    first_line = test_results.strip().split("\n")[0]
+                logger.info(
+                    f"Test results first line: '{first_line}' (for verification)"
+                )
 
                 # Double-check if test results indicate passing
                 if "result: passed" in first_line.lower():
@@ -242,7 +247,9 @@ class LogsAreAllYouNeed(Flow):
                     # Update the exit file with the new status
                     with open(exit_file_path, "w") as f:
                         f.write(str(self.exit_flag))
-                    logger.info(f"Updated exit status to {exit_file_path}: {self.exit_flag}")
+                    logger.info(
+                        f"Updated exit status to {exit_file_path}: {self.exit_flag}"
+                    )
             except Exception as e:
                 logger.warning(f"Could not read test results file: {e}")
 
@@ -315,24 +322,26 @@ class LogsAreAllYouNeed(Flow):
             else:
                 logger.warning(f"Outputs directory does not exist: {self.outputs_dir}")
         except Exception as e:
-            logger.error(f"Error listing files in outputs directory: {e}", exc_info=True)
+            logger.error(
+                f"Error listing files in outputs directory: {e}", exc_info=True
+            )
 
     def run(self, topic: str, logs: str = "", max_iterations: int = MAX_ITERATIONS):
         """Run the crew with specific inputs"""
         logger.info(f"\n=== Starting Run with Topic: {topic} ===")
-        
+
         # Debug paths
         self.debug_paths()
 
         # Clean outputs directory for new topic
-        if hasattr(self, '_last_topic') and self._last_topic != topic:
+        if hasattr(self, "_last_topic") and self._last_topic != topic:
             logger.info(f"New topic detected (was: {self._last_topic}, now: {topic})")
             self.clean_outputs_directory()
         self._last_topic = topic
-        
+
         # Ensure all output files exist
         self.ensure_output_files_exist()
-        
+
         # List files after ensuring they exist
         try:
             files = os.listdir(self.outputs_dir)
@@ -344,7 +353,7 @@ class LogsAreAllYouNeed(Flow):
         test_results_path = os.path.join(self.outputs_dir, "tests_results.md")
         if os.path.exists(test_results_path):
             try:
-                with open(test_results_path, 'r') as f:
+                with open(test_results_path, "r") as f:
                     logs = f.read()
                 logger.info(f"Loaded logs from {test_results_path}")
                 logger.info(f"Logs content: {logs[:200]}...")  # Log first 200 chars
@@ -356,18 +365,15 @@ class LogsAreAllYouNeed(Flow):
             logs = ""
 
         # Store inputs for task formatting
-        self.inputs = {
-            "topic": topic,
-            "logs": logs
-        }
+        self.inputs = {"topic": topic, "logs": logs}
         logger.info(f"Set inputs with topic and logs (logs length: {len(logs)})")
 
         crew = self.crew()
         self.iteration_count = 0  # Track iteration count as an instance variable
-        
+
         # Reset exit flag at the start of a new run
         self.exit_flag = False
-        
+
         while self.iteration_count < max_iterations and not self.exit_flag:
             self.iteration_count += 1
             logger.info(f"\n=== Starting iteration {self.iteration_count} ===")
@@ -378,42 +384,44 @@ class LogsAreAllYouNeed(Flow):
                 # Execute the crew
                 result = crew.kickoff(inputs=self.inputs)
                 logger.info(f"Crew kickoff completed. Exit flag: {self.exit_flag}")
-                
+
                 # Check if files were created
                 self.debug_paths()
-                
+
                 # Check test results directly
                 test_results_path = self.get_output_path("tests_results.md")
                 if os.path.exists(test_results_path):
-                    with open(test_results_path, 'r') as f:
+                    with open(test_results_path, "r") as f:
                         test_results = f.read()
                     logger.info(f"Test results after kickoff: {test_results[:200]}...")
-                    
+
                     # Check if test results indicate passing
                     if "result: passed" in test_results.lower():
                         self.exit_flag = True
-                        logger.info("Test results indicate PASS, setting exit_flag to True")
-                
+                        logger.info(
+                            "Test results indicate PASS, setting exit_flag to True"
+                        )
+
                 # Check exit status file
                 exit_file_path = self.get_output_path("exit_task_output.md")
                 if os.path.exists(exit_file_path):
-                    with open(exit_file_path, 'r') as f:
+                    with open(exit_file_path, "r") as f:
                         exit_flag_str = f.read().strip()
                     logger.info(f"Exit flag from file: {exit_flag_str}")
-                    
+
                     if exit_flag_str.lower() == "true":
                         self.exit_flag = True
                         logger.info("Exit flag file indicates TRUE")
-                
+
                 if self.exit_flag:
                     logger.info("🎉 Exit flag is True - tests passed successfully!")
                     logger.info("\n✅ Tests passed successfully! Exiting crew.\n")
-                    
+
                     # Save the final iteration count
-                    with open(self.get_output_path("iteration_count.txt"), 'w') as f:
+                    with open(self.get_output_path("iteration_count.txt"), "w") as f:
                         f.write(str(self.iteration_count))
                     logger.info(f"Saved final iteration count: {self.iteration_count}")
-                    
+
                     return crew
                 else:
                     logger.info("❌ Tests failed or exit flag not set")
@@ -421,9 +429,9 @@ class LogsAreAllYouNeed(Flow):
             except Exception as e:
                 logger.error(f"Error during iteration: {e}", exc_info=True)
                 break
-        
+
         # Save the final iteration count even if we didn't succeed
-        with open(self.get_output_path("iteration_count.txt"), 'w') as f:
+        with open(self.get_output_path("iteration_count.txt"), "w") as f:
             f.write(str(self.iteration_count))
         logger.info(f"Saved final iteration count: {self.iteration_count}")
 
@@ -437,7 +445,7 @@ class LogsAreAllYouNeed(Flow):
                 "codebase.py",
                 "unit_tests.py",
                 "tests_results.md",
-                "exit_task_output.md"
+                "exit_task_output.md",
             ]
 
             for filename in required_files:

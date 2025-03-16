@@ -59,3 +59,40 @@ Data and scripts for evaluating which system --- naive or one that appends logs 
 ## Authors
 
 Atul Dhingra and Gaurav Sood
+
+# Logs Are All You Need
+
+Auto-append logs, etc., to your call to GenAI using crewAI.
+
+## Repository Structure
+
+```
+logs_are_all_you_need/
+├── loogy/                    # Core functionality
+├── benchmark/                # Benchmarking tools
+├── streamlit/                # Streamlit app
+├── outputs/                  # Generated outputs directory
+```
+
+## Installation
+
+Install the package in development mode:
+
+```bash
+# Install in development mode
+pip install -e .
+```
+
+## Running the Benchmark
+
+```bash
+cd benchmark
+python src/process_dataset.py
+```
+
+## Running the Streamlit App
+
+```bash
+cd streamlit
+streamlit run app.py
+```
