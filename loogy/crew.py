@@ -16,8 +16,8 @@ MAX_ITERATIONS = 3
 
 
 @CrewBase
-class LogsAreAllYouNeed(Flow):
-    """LogsAreAllYouNeed crew"""
+class loogy(Flow):
+    """loogy crew"""
 
     # Learn more about YAML configuration files here:
     # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
@@ -266,7 +266,7 @@ class LogsAreAllYouNeed(Flow):
 
     @crew
     def crew(self) -> Crew:
-        """Creates the LogsAreAllYouNeed crew that runs until success"""
+        """Creates the loogy crew that runs until success"""
         logger.info("Creating crew...")
 
         crew = Crew(

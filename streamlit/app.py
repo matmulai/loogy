@@ -2,13 +2,40 @@ import streamlit as st
 import os
 from pathlib import Path
 import time
-from loogy.crew import LogsAreAllYouNeed
+import sys
 from dotenv import load_dotenv
 import logging
 
 # Initialize logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+# Add the parent directory to the Python path to find the loogy package
+parent_dir = str(Path(__file__).parent.parent.absolute())
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+    logger.info(f"Added {parent_dir} to Python path")
+
+# Now try to import loogy
+try:
+    from loogy.crew import loogy
+    logger.info("Successfully imported loogy")
+except ImportError as e:
+    logger.error(f"Failed to import loogy: {e}")
+    st.error(f"Failed to import loogy package: {e}")
+    
+    # If we're in Streamlit Cloud, try to install the package
+    if os.environ.get("IS_STREAMLIT_CLOUD", "false").lower() == "true":
+        logger.info("Attempting to install loogy package in Streamlit Cloud...")
+        import subprocess
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "git+https://github.com/dhingratul/logs_are_all_you_need.git"])
+            from loogy.crew import loogy
+            logger.info("Successfully installed and imported loogy")
+        except Exception as install_error:
+            logger.error(f"Failed to install loogy: {install_error}")
+            st.error(f"Failed to install loogy package: {install_error}")
+            st.stop()
 
 # Load environment variables from the correct path
 env_path = Path(__file__).parent.parent.parent / ".env"
@@ -85,7 +112,7 @@ def main():
 
     if clear_button:
         # Initialize crew just to use clean_outputs_directory
-        crew = LogsAreAllYouNeed()
+        crew = loogy()
         crew.clean_outputs_directory()
         st.session_state.iteration = 0
         st.success("✨ Outputs directory cleared!")
@@ -96,7 +123,7 @@ def main():
             os.environ["OPENAI_API_KEY"] = api_key
 
         # Initialize crew
-        crew = LogsAreAllYouNeed(model_provider=model_provider, model_name=model_name)
+        crew = loogy(model_provider=model_provider, model_name=model_name)
 
         # Debug paths
         crew.debug_paths()
