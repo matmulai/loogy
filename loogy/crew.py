@@ -26,11 +26,11 @@ class LogsAreAllYouNeed(Flow):
     tasks_config = "config/tasks.yaml"
     exit_flag = False
 
-    def __init__(self, model_provider="Ollama", model_name="qwen2.5-coder:7b"):
+    def __init__(self, model_provider="Ollama", model_name="qwen2.5-coder:7b", output_dir="outputs"):
         super().__init__()
 
         # Simply use "outputs" directory in the current working directory
-        self.outputs_dir = Path("outputs")
+        self.outputs_dir = Path(output_dir)
 
         # Create outputs directory if it doesn't exist
         os.makedirs(self.outputs_dir, exist_ok=True)
