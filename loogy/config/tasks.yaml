@@ -2,6 +2,7 @@ develop_topic_task:
   description: >
     You are tasked with developing Python code for {topic}.
     Previous execution logs : {logs}
+    Donot change the overall structure of the code, only fix the bugs and errors.
     Write clean, efficient, and well-documented Python code.
     Include docstrings and type hints where appropriate.
     Also include logging in the code wherever appropriate.

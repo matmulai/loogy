@@ -63,9 +63,9 @@ def main():
     if "iteration" not in st.session_state:
         st.session_state.iteration = 0
     if "topic" not in st.session_state:
-        st.session_state.topic = """ Fix the code ```import numpy as np \n import pandas as pd \n from sklearn.datasets import make_classification \n 
+        st.session_state.topic = """ Fix the code ```import numpy as np \n import pandas as pd \n from sklearn.datasets import make_classification \n
     from sklearn.model_selection import train_test_split\n from xgboost import XGBClassifier\n from sklearn.metrics import accuracy_score\n
-    X, y = make_classification(n_samples=1000, n_features=20, n_informative=15,n_redundant=5, random_state=42) \n np.random.shuffle(X) 
+    X, y = make_classification(n_samples=1000, n_features=20, n_informative=15,n_redundant=5, random_state=42) \n np.random.shuffle(X)
     X = X.T \n X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) \n
     X_train[:, 0] = X_train[:, 1] + X_train[:, 2, :] X_train = X_train @ np.zeros((X_train.shape[1], X_train.shape[1]))  \n
     model = XGBClassifier(use_label_encoder=False, eval_metric='logloss') model.fit(X_train, y_train) \n
@@ -97,10 +97,10 @@ def main():
 
         # Initialize crew
         crew = LogsAreAllYouNeed(model_provider=model_provider, model_name=model_name)
-        
+
         # Debug paths
         crew.debug_paths()
-        
+
         # Ensure output files exist
         crew.ensure_output_files_exist()
 
@@ -148,7 +148,7 @@ def main():
                         with open(code_path, "w") as f:
                             f.write("# No code generated yet")
                         logger.warning(f"Created empty file at {code_path}")
-                    
+
                     with open(code_path, "r") as f:
                         code_content = f.read()
                     code_display.code(code_content, language="python")
@@ -164,7 +164,7 @@ def main():
                         with open(test_path, "w") as f:
                             f.write("*No test results available yet*")
                         logger.warning(f"Created empty file at {test_path}")
-                    
+
                     with open(test_path, "r") as f:
                         test_content = f.read()
                     test_results.markdown(test_content)
