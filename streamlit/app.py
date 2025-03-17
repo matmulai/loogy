@@ -23,13 +23,21 @@ try:
 except ImportError as e:
     logger.error(f"Failed to import loogy: {e}")
     st.error(f"Failed to import loogy package: {e}")
-    
+
     # If we're in Streamlit Cloud, try to install the package
     if os.environ.get("IS_STREAMLIT_CLOUD", "false").lower() == "true":
         logger.info("Attempting to install loogy package in Streamlit Cloud...")
         import subprocess
         try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "git+https://github.com/dhingratul/logs_are_all_you_need.git"])
+            subprocess.check_call(
+                [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    "git+https://github.com/matmulai/loogy.git",
+                ]
+            )
             from loogy.crew import loogy
             logger.info("Successfully installed and imported loogy")
         except Exception as install_error:
