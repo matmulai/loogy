@@ -1,4 +1,0 @@
-crewai==0.98.0
-crewai-tools==0.32.1
-# Install directly from GitHub repository
-git+https://github.com/matmulai/loogy.git

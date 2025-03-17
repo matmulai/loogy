@@ -1,5 +1,0 @@
-crewai==0.98.0
-crewai-tools==0.32.1
-streamlit==1.43.2
-# Install the local package
-../.
