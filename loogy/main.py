@@ -1,4 +1,4 @@
-from loogy.crew import LogsAreAllYouNeed
+from loogy.crew import loogy
 import argparse
 import os
 
@@ -14,7 +14,7 @@ def get_script_content(path_to_script):
         return f.read()
 
 def main(args):
-    crew = LogsAreAllYouNeed(model_provider=args.model_provider, model_name=args.model_name)
+    crew = loogy(model_provider=args.model_provider, model_name=args.model_name)
     crew.run(topic=get_script_content(args.path_to_script))
 
 if __name__ == "__main__":

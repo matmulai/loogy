@@ -1,8 +1,8 @@
-from .crew import LogsAreAllYouNeed
+from .crew import loogy
 
 def run():
     """Entry point for the loogy package."""
-    crew = LogsAreAllYouNeed()
+    crew = loogy()
     crew.run()
 
 if __name__ == "__main__":
